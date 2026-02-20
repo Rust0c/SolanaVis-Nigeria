@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SolanaVis Nigeria — Wallet Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&family=Noto+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --gold: #F5A623;
+    --purple: #7B2FBE;
+    --deep: #0D0820;
+    --cosmic: #1A0A38;
+    --teal: #00E5C8;
+    --coral: #FF5F4B;
+    --light: #F0E6FF;
+    --muted: #9B8EC4;
+    --green: #39FF14;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--deep);
+    color: var(--light);
+    font-family: 'Noto Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ── BACKGROUND COSMIC GRID ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(123,47,190,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(123,47,190,0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── FLOATING ORBS ── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 500px; height: 500px; background: var(--purple); top: -150px; right: -100px; animation-delay: 0s; }
+  .orb-2 { width: 350px; height: 350px; background: var(--gold); bottom: -100px; left: -80px; animation-delay: 4s; }
+  .orb-3 { width: 250px; height: 250px; background: var(--teal); top: 40%; left: 50%; animation-delay: 8s; }
+
+  @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px, -40px) scale(1.08); } }
+
+  /* ── LAYOUT ── */
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 60px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--gold); }
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    background: rgba(245,166,35,0.15);
+    border: 1px solid rgba(245,166,35,0.3);
+    color: var(--gold);
+    padding: 4px 12px;
+    border-radius: 100px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .hero-kicker {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--teal);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .hero-kicker::before, .hero-kicker::after {
+    content: '';
+    width: 40px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--teal));
+  }
+  .hero-kicker::after { background: linear-gradient(90deg, var(--teal), transparent); }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+  h1 .accent { color: var(--gold); position: relative; }
+  h1 .accent::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--coral));
+    border-radius: 2px;
+    animation: underline-grow 1s 0.5s both;
+  }
+  @keyframes underline-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    margin-bottom: 48px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .progress-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .progress-track {
+    height: 6px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--purple), var(--gold), var(--teal));
+    background-size: 200% 100%;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    animation: shimmer 2s linear infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+
+  /* Step dots */
+  .step-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+  }
+  .dot.active { background: var(--gold); transform: scale(1.4); box-shadow: 0 0 10px var(--gold); }
+  .dot.done { background: var(--teal); border-color: var(--teal); }
+
+  /* ── CANVAS AREA ── */
+  .canvas-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  #illustrationCanvas {
+    border-radius: 20px;
+    border: 1px solid rgba(123,47,190,0.3);
+    box-shadow:
+      0 0 60px rgba(123,47,190,0.15),
+      0 0 120px rgba(123,47,190,0.05),
+      inset 0 0 40px rgba(0,0,0,0.4);
+    display: block;
+    max-width: 100%;
+  }
+
+  /* ── STEP CARD ── */
+  .step-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(123,47,190,0.2);
+    border-radius: 20px;
+    padding: 36px 40px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    transition: all 0.5s ease;
+    animation: cardIn 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .step-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--purple), var(--gold), var(--teal));
+  }
+
+  .step-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--teal);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .step-desc {
+    color: var(--muted);
+    line-height: 1.8;
+    font-weight: 300;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    transition: color 0.3s;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+  .checklist li:hover { background: rgba(255,255,255,0.04); }
+  .checklist li.checked { color: var(--light); }
+  .check-box {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    transition: all 0.3s ease;
+    margin-top: 1px;
+  }
+  .checklist li.checked .check-box {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: var(--deep);
+    box-shadow: 0 0 12px rgba(0,229,200,0.4);
+  }
+
+  /* ── TIP BOX ── */
+  .tip-box {
+    background: rgba(245,166,35,0.06);
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 0.85rem;
+    color: rgba(245,166,35,0.9);
+    line-height: 1.6;
+  }
+  .tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── NAVIGATION BUTTONS ── */
+  .nav-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-weight: 700;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--muted);
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: var(--light); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple), var(--gold));
+    color: white;
+    box-shadow: 0 4px 30px rgba(123,47,190,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold), var(--teal));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-primary:hover::after { opacity: 1; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(123,47,190,0.5); }
+  .btn-primary span { position: relative; z-index: 1; }
+
+  /* ── COMPLETION ── */
+  .completion {
+    text-align: center;
+    padding: 60px 20px;
+    animation: cardIn 0.6s ease;
+  }
+  .completion-icon {
+    font-size: 4rem;
+    margin-bottom: 24px;
+    display: block;
+    animation: bounceIn 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes bounceIn {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .completion h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .completion p { color: var(--muted); margin-bottom: 32px; line-height: 1.8; max-width: 480px; margin-inline: auto; }
+
+  /* ── ADINKRA PATTERN DECORATION ── */
+  .adinkra-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 24px 0;
+    opacity: 0.3;
+    font-size: 1.4rem;
+    letter-spacing: 8px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(155,142,196,0.4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .step-card { padding: 24px 20px; }
+    h1 { font-size: 2rem; }
+    .nav-buttons { flex-direction: column; }
+    .btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrapper">
+
+  <nav>
+    <div class="logo">Solana<span>Vis</span> 🌍</div>
+    <div class="badge">Superteam Nigeria</div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-kicker">⬡ Wallet Setup Guide ⬡</div>
+    <h1>Your key to<br/>the <span class="accent">Solana</span> universe</h1>
+    <p class="hero-sub">Set up your Solana wallet in minutes. Step-by-step. No prior experience needed. Built for Nigerian developers, by Nigerian builders.</p>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <span class="progress-label">Your Progress</span>
+      <span class="progress-pct" id="pctLabel">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="step-dots" id="stepDots"></div>
+  </div>
+
+  <!-- CANVAS ILLUSTRATION -->
+  <div class="canvas-stage">
+    <canvas id="illustrationCanvas" width="880" height="320"></canvas>
+  </div>
+
+  <!-- STEP CONTENT -->
+  <div id="stepContent"></div>
+
+  <!-- NAVIGATION -->
+  <div class="nav-buttons" id="navButtons">
+    <button class="btn btn-ghost" id="btnPrev" onclick="prevStep()">← Back</button>
+    <button class="btn btn-primary" id="btnNext" onclick="nextStep()"><span>Continue →</span></button>
+  </div>
+
+  <!-- ADINKRA DECORATION -->
+  <div class="adinkra-row">◈ ◈ ◈ ◈ ◈</div>
+
+  <footer>SolanaVis Nigeria &nbsp;·&nbsp; Open Source &nbsp;·&nbsp; MIT License &nbsp;·&nbsp; Superteam Earn Grant Project</footer>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+const steps = [
+  {
+    id: 'choose',
+    number: 'Step 01 / 05',
+    title: 'Choose Your Wallet',
+    desc: 'The first step is picking a Solana wallet. Think of it as your digital identity and bank account on the blockchain — all in one. We recommend Phantom for beginners.',
+    checks: [
+      'Understand: a wallet stores your private keys, not your crypto itself',
+      'Phantom Wallet — best for beginners (browser + mobile)',
+      'Solflare — great alternative with advanced features',
+      'Never share your wallet address as a "password"',
+    ],
+    tip: '💡 Phantom works on Chrome, Firefox, Brave, and as a mobile app. Start with whatever device you use most.',
+    color: '#7B2FBE',
+    accent: '#F5A623',
+    icon: '👜'
+  },
+  {
+    id: 'install',
+    number: 'Step 02 / 05',
+    title: 'Install the Extension',
+    desc: 'Head to phantom.app and download the browser extension. Only install from the official website — never from random links or DMs.',
+    checks: [
+      'Go to phantom.app in your browser',
+      'Click "Download" and add to your browser',
+      'Pin the extension to your toolbar for easy access',
+      'Verify the URL says phantom.app — watch for fakes!',
+    ],
+    tip: '⚠️ Security first: only install from official sources. Phishing wallets exist. Bookmark phantom.app right now.',
+    color: '#9B2FBE',
+    accent: '#00E5C8',
+    icon: '🔌'
+  },
+  {
+    id: 'create',
+    number: 'Step 03 / 05',
+    title: 'Create a New Wallet',
+    desc: 'Open Phantom and select "Create New Wallet". You\'ll be given a 12-word Secret Recovery Phrase. This is the most important step — treat it like a combination to a physical safe.',
+    checks: [
+      'Click "Create New Wallet" in the Phantom popup',
+      'Write down your 12-word phrase on PAPER — not digitally',
+      'Store it in a safe, offline location',
+      'Never photograph, screenshot, or type it into any website',
+      'Confirm the phrase in the correct order to proceed',
+    ],
+    tip: '🔐 Your Secret Recovery Phrase = complete access to your wallet. Anyone who has it owns your wallet. Protect it with your life.',
+    color: '#FF5F4B',
+    accent: '#F5A623',
+    icon: '🔑'
+  },
+  {
+    id: 'secure',
+    number: 'Step 04 / 05',
+    title: 'Set Your Password',
+    desc: 'Create a strong local password for your Phantom app. This protects the extension on your device — but remember, it\'s NOT the same as your Secret Recovery Phrase.',
+    checks: [
+      'Create a password with 12+ characters',
+      'Mix uppercase, lowercase, numbers, and symbols',
+      'Use a password manager (Bitwarden is free)',
+      'This password only unlocks the local app — not your funds globally',
+    ],
+    tip: '🛡️ Your password protects the app on this device only. Your seed phrase is what protects your actual funds everywhere.',
+    color: '#7B2FBE',
+    accent: '#39FF14',
+    icon: '🛡️'
+  },
+  {
+    id: 'explore',
+    number: 'Step 05 / 05',
+    title: 'Explore Your Wallet',
+    desc: 'Your Solana wallet is ready! Let\'s walk through what you\'re looking at and how to receive your first SOL so you can start building and transacting.',
+    checks: [
+      'Copy your public wallet address (it\'s safe to share)',
+      'Your address starts with a random string of letters/numbers',
+      'Go to solfaucet.com to receive free devnet SOL for testing',
+      'Explore the Assets, Activity, and Apps tabs',
+      'You\'re now part of the Solana ecosystem 🎉',
+    ],
+    tip: '🚀 Your public address is like your email — safe to share with anyone who wants to send you SOL or NFTs. Never share your seed phrase.',
+    color: '#00E5C8',
+    accent: '#F5A623',
+    icon: '🚀'
+  }
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let current = 0;
+let checked = steps.map(s => new Array(s.checks.length).fill(false));
+let complete = false;
+
+// ══════════════════════════════════════════
+//  CANVAS ILLUSTRATIONS
+// ══════════════════════════════════════════
+const canvas = document.getElementById('illustrationCanvas');
+const ctx = canvas.getContext('2d');
+let animFrame;
+let tick = 0;
+
+function drawAfroPattern(x, y, size, color, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  // Geometric diamond pattern
+  ctx.beginPath();
+  ctx.moveTo(x, y - size);
+  ctx.lineTo(x + size, y);
+  ctx.lineTo(x, y + size);
+  ctx.lineTo(x - size, y);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawHexGrid(t) {
+  const cols = 12, rows = 5;
+  const hw = canvas.width / cols;
+  const hh = canvas.height / rows;
+  for (let r = 0; r < rows + 1; r++) {
+    for (let c = 0; c < cols + 1; c++) {
+      const offset = r % 2 === 0 ? 0 : hw / 2;
+      const px = c * hw + offset;
+      const py = r * hh;
+      const wave = Math.sin(t * 0.02 + c * 0.4 + r * 0.6) * 0.5 + 0.5;
+      drawAfroPattern(px, py, 12, '#7B2FBE', wave * 0.15);
+    }
+  }
+}
+
+const illustrations = {
+  choose: (t) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawHexGrid(t);
+    // Wallet shape
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    const bob = Math.sin(t * 0.04) * 8;
+    ctx.save();
+    ctx.translate(cx, cy + bob);
+    // Wallet body
+    ctx.beginPath();
+    ctx.roundRect(-120, -70, 240, 140, 16);
+    ctx.fillStyle = 'rgba(123,47,190,0.3)';
+    ctx.fill();
+    ctx.strokeStyle = '#9B2FBE';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Wallet clasp
+    ctx.beginPath();
+    ctx.roundRect(60, -20, 60, 40, 20);
+    ctx.fillStyle = 'rgba(245,166,35,0.2)';
+    ctx.fill();
+    ctx.strokeStyle = '#F5A623';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Dot inside clasp
+    ctx.beginPath();
+    ctx.arc(90, 0, 8, 0, Math.PI * 2);
+    ctx.fillStyle = '#F5A623';
+    ctx.fill();
+    // Phantom logo hint
+    ctx.font = 'bold 36px sans-serif';
+    ctx.fillStyle = 'rgba(240,230,255,0.9)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('👜', -20, 0);
+    ctx.restore();
+    // Orbiting particles
+    for (let i = 0; i < 6; i++) {
+      const angle = (t * 0.03) + (i / 6) * Math.PI * 2;
+      const px = cx + Math.cos(angle) * 160;
+      const py = cy + Math.sin(angle) * 60;
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, Math.PI * 2);
+      ctx.fillStyle = i % 2 === 0 ? '#F5A623' : '#00E5C8';
+      ctx.globalAlpha = 0.7;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  },
+
+  install: (t) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawHexGrid(t);
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    // Browser mockup
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.beginPath();
+    ctx.roundRect(-200, -90, 400, 170, 12);
+    ctx.fillStyle = 'rgba(26,10,56,0.8)';
+    ctx.fill();
+    ctx.strokeStyle = '#7B2FBE';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Browser bar
+    ctx.fillStyle = 'rgba(123,47,190,0.3)';
+    ctx.fillRect(-200, -90, 400, 32);
+    // Traffic lights
+    [['#FF5F4B',-160],['#F5A623',-140],['#39FF14',-120]].forEach(([c,x]) => {
+      ctx.beginPath(); ctx.arc(x, -74, 6, 0, Math.PI*2);
+      ctx.fillStyle = c; ctx.fill();
+    });
+    // URL bar
+    ctx.beginPath();
+    ctx.roundRect(-80, -82, 200, 16, 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.07)';
+    ctx.fill();
+    ctx.font = '10px Space Mono, monospace';
+    ctx.fillStyle = '#00E5C8';
+    ctx.textAlign = 'center';
+    ctx.fillText('phantom.app', 20, -71);
+    // Download button
+    const pulse = Math.sin(t * 0.05) * 4;
+    ctx.beginPath();
+    ctx.roundRect(-80, 20 - pulse/2, 160, 44 + pulse, 22);
+    ctx.fillStyle = 'rgba(123,47,190,0.6)';
+    ctx.fill();
+    ctx.strokeStyle = '#9B2FBE';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.font = 'bold 14px Syne, sans-serif';
+    ctx.fillStyle = '#F0E6FF';
+    ctx.fillText('⬇ Download', 0, 47);
+    // Extension puzzle piece icon
+    ctx.font = '28px sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🧩', 0, -20);
+    ctx.restore();
+  },
+
+  create: (t) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawHexGrid(t);
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    // Seed phrase cards
+    const words = ['solar','eagle','tribe','river','cosmic','night','flame','roots','swift','chain','build','zero'];
+    const cols = 4, cardW = 88, cardH = 34, gap = 10;
+    const totalW = cols * (cardW + gap) - gap;
+    const rows = 3, totalH = rows * (cardH + gap) - gap;
+    words.forEach((word, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = -totalW/2 + col * (cardW + gap);
+      const y = -totalH/2 + row * (cardH + gap);
+      const reveal = Math.max(0, Math.min(1, (t - i * 8) / 20));
+      ctx.save();
+      ctx.globalAlpha = 0.3 + reveal * 0.7;
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardW, cardH, 6);
+      ctx.fillStyle = `rgba(123,47,190,${0.2 + reveal * 0.3})`;
+      ctx.fill();
+      ctx.strokeStyle = reveal > 0.5 ? '#F5A623' : '#7B2FBE';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      if (reveal > 0.3) {
+        ctx.font = '8px Space Mono, monospace';
+        ctx.fillStyle = 'rgba(155,142,196,0.7)';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${i+1}.`, x + 6, y + 12);
+        ctx.font = 'bold 11px Noto Sans, sans-serif';
+        ctx.fillStyle = '#F0E6FF';
+        ctx.fillText(word, x + 20, y + 22);
+      }
+      ctx.restore();
+    });
+    // Lock icon above
+    ctx.font = '32px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🔑', 0, -totalH/2 - 36);
+    ctx.restore();
+  },
+
+  secure: (t) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawHexGrid(t);
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    // Shield
+    const sh = Math.sin(t * 0.04) * 5;
+    ctx.beginPath();
+    ctx.moveTo(0, -80 + sh);
+    ctx.bezierCurveTo(70, -80 + sh, 100, -30 + sh, 100, 10 + sh);
+    ctx.bezierCurveTo(100, 60 + sh, 50, 90 + sh, 0, 110 + sh);
+    ctx.bezierCurveTo(-50, 90 + sh, -100, 60 + sh, -100, 10 + sh);
+    ctx.bezierCurveTo(-100, -30 + sh, -70, -80 + sh, 0, -80 + sh);
+    ctx.fillStyle = 'rgba(57,255,20,0.08)';
+    ctx.fill();
+    ctx.strokeStyle = '#39FF14';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Lock icon
+    ctx.font = '52px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🛡️', 0, 10 + sh);
+    // Password dots
+    const dots = 12;
+    for (let i = 0; i < dots; i++) {
+      const filled = (Math.floor(t / 20) + i) % (dots + 4) < dots;
+      const dx = -((dots - 1) * 14) / 2 + i * 14;
+      ctx.beginPath();
+      ctx.arc(dx, 90 + sh, 5, 0, Math.PI * 2);
+      ctx.fillStyle = filled ? '#39FF14' : 'rgba(255,255,255,0.1)';
+      ctx.fill();
+    }
+    ctx.restore();
+  },
+
+  explore: (t) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawHexGrid(t);
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    // Planet / Solana orb
+    const wobble = Math.sin(t * 0.03) * 6;
+    const grad = ctx.createRadialGradient(-20, -20, 10, 0, wobble, 90);
+    grad.addColorStop(0, 'rgba(123,47,190,0.9)');
+    grad.addColorStop(0.5, 'rgba(57,10,100,0.8)');
+    grad.addColorStop(1, 'rgba(13,8,32,0.9)');
+    ctx.beginPath();
+    ctx.arc(0, wobble, 80, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(245,166,35,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Ring
+    ctx.beginPath();
+    ctx.ellipse(0, wobble, 120, 30, -0.3, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,229,200,0.4)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // S logo hint
+    ctx.font = 'bold 42px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('◎', 0, wobble);
+    ctx.fillStyle = '#00E5C8';
+    // Orbiting wallet addresses (abbreviated)
+    const addrs = ['Gh7k...4Xmn', 'BjR2...9Qqw'];
+    addrs.forEach((addr, i) => {
+      const angle = t * 0.02 + i * Math.PI;
+      const ox = Math.cos(angle) * 170;
+      const oy = Math.sin(angle) * 55 + wobble;
+      ctx.beginPath();
+      ctx.roundRect(ox - 52, oy - 13, 104, 26, 13);
+      ctx.fillStyle = 'rgba(0,229,200,0.1)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,229,200,0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.font = '9px Space Mono, monospace';
+      ctx.fillStyle = '#00E5C8';
+      ctx.textAlign = 'center';
+      ctx.fillText(addr, ox, oy + 1);
+    });
+    ctx.restore();
+  }
+};
+
+function animate() {
+  if (complete) return;
+  tick++;
+  const step = steps[current];
+  if (illustrations[step.id]) illustrations[step.id](tick);
+  animFrame = requestAnimationFrame(animate);
+}
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+function renderDots() {
+  const container = document.getElementById('stepDots');
+  container.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === current ? ' active' : '') + (i < current ? ' done' : '');
+    d.onclick = () => goTo(i);
+    container.appendChild(d);
+  });
+}
+
+function renderStep() {
+  const step = steps[current];
+  const pct = Math.round((current / steps.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('pctLabel').textContent = pct + '%';
+  renderDots();
+
+  const checksHtml = step.checks.map((c, i) => `
+    <li class="${checked[current][i] ? 'checked' : ''}" onclick="toggleCheck(${i})">
+      <div class="check-box">${checked[current][i] ? '✓' : ''}</div>
+      <span>${c}</span>
+    </li>`).join('');
+
+  document.getElementById('stepContent').innerHTML = `
+    <div class="step-card">
+      <div class="step-number">${step.number}</div>
+      <div class="step-title">${step.icon} ${step.title}</div>
+      <p class="step-desc">${step.desc}</p>
+      <ul class="checklist">${checksHtml}</ul>
+      <div class="tip-box">
+        <span class="tip-icon">📌</span>
+        <span>${step.tip}</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btnPrev').style.visibility = current === 0 ? 'hidden' : 'visible';
+  document.getElementById('btnNext').querySelector('span').textContent =
+    current === steps.length - 1 ? 'Complete Setup ✓' : 'Continue →';
+
+  cancelAnimationFrame(animFrame);
+  tick = 0;
+  animate();
+}
+
+function toggleCheck(i) {
+  checked[current][i] = !checked[current][i];
+  renderStep();
+}
+
+function nextStep() {
+  if (current < steps.length - 1) {
+    current++;
+    renderStep();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showCompletion();
+  }
+}
+
+function prevStep() {
+  if (current > 0) { current--; renderStep(); }
+}
+
+function goTo(i) { current = i; renderStep(); }
+
+function showCompletion() {
+  complete = true;
+  cancelAnimationFrame(animFrame);
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('pctLabel').textContent = '100%';
+  renderDots();
+
+  // Final canvas celebration
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawHexGrid(500);
+  for (let i = 0; i < 40; i++) {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    const colors = ['#F5A623','#00E5C8','#9B2FBE','#FF5F4B','#39FF14'];
+    ctx.beginPath();
+    ctx.arc(x, y, Math.random() * 5 + 2, 0, Math.PI * 2);
+    ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+    ctx.globalAlpha = Math.random() * 0.8 + 0.2;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  ctx.font = 'bold 60px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🎉', canvas.width / 2, canvas.height / 2);
+  ctx.font = 'bold 28px Syne, sans-serif';
+  ctx.fillStyle = '#F5A623';
+  ctx.fillText('Wallet Ready!', canvas.width / 2, canvas.height / 2 + 70);
+
+  document.getElementById('stepContent').innerHTML = `
+    <div class="completion">
+      <span class="completion-icon">🌍</span>
+      <h2>You're in the ecosystem.</h2>
+      <p>Your Solana wallet is set up and secured. You're now ready to receive SOL, explore dApps, and start building on the most performant blockchain in the world — as a Nigerian developer.</p>
+      <div class="adinkra-row">◈ ◈ ◈ ◈ ◈</div>
+      <p style="margin-top:12px; color: var(--teal); font-size: 0.9rem;">Next: Get devnet SOL from solfaucet.com and write your first Solana program →</p>
+    </div>
+  `;
+  document.getElementById('navButtons').innerHTML = `
+    <button class="btn btn-ghost" onclick="restartGuide()">← Start Over</button>
+    <button class="btn btn-primary" onclick="window.open('https://solfaucet.com','_blank')"><span>Get Devnet SOL 🚀</span></button>
+  `;
+}
+
+function restartGuide() {
+  current = 0;
+  complete = false;
+  checked = steps.map(s => new Array(s.checks.length).fill(false));
+  document.getElementById('navButtons').innerHTML = `
+    <button class="btn btn-ghost" id="btnPrev" onclick="prevStep()">← Back</button>
+    <button class="btn btn-primary" id="btnNext" onclick="nextStep()"><span>Continue →</span></button>
+  `;
+  renderStep();
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+renderStep();
+</script>
+</body>
+</html>
